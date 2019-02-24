@@ -131,17 +131,27 @@ Now we illustrate the calculation by taking the **category vitality** as an exam
 
 The score of a good<img src="https://latex.codecogs.com/svg.latex?\Large&space;j" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" /> for a given user <img src="https://latex.codecogs.com/svg.latex?\Large&space;i" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" /> is
 
+
+
 <img src="https://latex.codecogs.com/svg.latex?\Large&space;score_{ij}=0.1*n_1+0.2*n_2+0.3*n_3+0.4*n_4" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
+
+
 
 The  **category vitality** of user <img src="https://latex.codecogs.com/svg.latex?\Large&space;i" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" /> is
 
+
+
 <img src="https://latex.codecogs.com/svg.latex?\Large&space;S_{cat-vitality}^i=mean(score_{ij})\quad j=1,2,3,\cdots,n_i" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
+
+
 
 where <img src="https://latex.codecogs.com/svg.latex?\Large&space;n_i" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" /> refers the item that is relevant to the user <img src="https://latex.codecogs.com/svg.latex?\Large&space;i" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />.
 
 
 
 Similarly, we can calculate the other three indicators and combine them into a 4-dimension vector:
+
+
 
 <img src="https://latex.codecogs.com/svg.latex?\Large&space;v_i=(S_{cat-vitality},S_{brand -vitality},S_{category-popularity},S_{brand-popularity})" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
 
