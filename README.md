@@ -149,23 +149,7 @@ where <img src="https://latex.codecogs.com/svg.latex?\Large&space;n_i" title="\L
 
 
 
-Similarly, we can calculate the other three indicators and combine them into a 4-dimension vector:
-
-
-
-
-
-
-
-
-
-
-
-
-
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;v_i=(S_{cv}, S_{bv}, S_{cp}, S_{bp})" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
-
-
+Similarly, we can calculate the other three indicators and combine them into a 4-dimension vector.
 
   
 
