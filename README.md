@@ -141,7 +141,7 @@ The  **category vitality** of user <img src="https://latex.codecogs.com/svg.late
 
 
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;S_{cat-vitality}^i=mean(score_{ij})\quad j=1,2,3,\cdots,n_i" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
+<img src="https://latex.codecogs.com/svg.latex?\Large&space;S_{cat-vitality}^i=mean(score_{ij})" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
 
 
 
@@ -153,7 +153,11 @@ Similarly, we can calculate the other three indicators and combine them into a 4
 
 
 
+
+
 <img src="https://latex.codecogs.com/svg.latex?\Large&space;v_i=(S_{cat-vitality},S_{brand -vitality},S_{category-popularity},S_{brand-popularity})" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
+
+
 
 
 
