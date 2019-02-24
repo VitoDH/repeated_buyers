@@ -159,7 +159,17 @@ Similarly, we can calculate the other three indicators and combine them into a 4
 
 
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;v_i=(S_{cat-vitality},S_{brand -vitality},S_{category-popularity},S_{brand-popularity})" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
+
+
+
+
+<img src="https://latex.codecogs.com/svg.latex?\Large&space;v_i=(S_{cat-vitality}, S_{brand -vitality}, S_{category-popularity}, S_{brand-popularity})" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
+
+
+
+  
+
+
 
 
 
