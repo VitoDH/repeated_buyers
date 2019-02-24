@@ -1,4 +1,4 @@
-# Predicting the potential repeated buyers
+# Predicting Potential Repeated Buyers
 #### **Author**: Dehai Liu
 
 **Department of Mathematics, Sun Yat-Sen University**
@@ -65,241 +65,222 @@ Our project mainly focus on digging out the potential online repeated-buyers wit
 
 ### (b) Outlier Detection
 
+Since the existence of click farming, we need to find out the user and the merchant with unusual clicking behavior and then remove them from the trainSet. Here we offer the scatterplot of  four actions  for users and merchants, respectively.
 
 
 
+**User**
 
+<img src="https://github.com/VitoDH/repeated_buyers/raw/master/img/scatter_plot_1.png" style="zoom:90%" />
 
 
 
+**Merchant(Seller)**
 
-## Preprocessing
+<img src="https://github.com/VitoDH/repeated_buyers/raw/master/img/scatter_plot_2.png" style="zoom:90%" />
 
-### a. Preprocessing for Decision Tree
+Based on the distribution above, we define the data to be an outlier if it exceeds the threshold below:
 
-#### (1)  Normalization
+|                 |  User  | Merchant |
+| :-------------: | :----: | :------: |
+|      Click      | > 4000 | > 200000 |
+|   Add to Cart   |  None  |  > 250   |
+|       Buy       | > 100  | > 10000  |
+| Add to favorite | >  450 | > 10000  |
 
-Supposed the data matrix is <img src="https://latex.codecogs.com/svg.latex?\Large&space;X" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />, we can normalize it to speed up training by dividing by 255. 
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;X_{norm}=\frac{X}{255}" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
 
-#### (2) Max Absolute Scale
+After removing the outlier of users and merchants, we still have **90917** samples in training set.
 
-To scale each feature to the<img src="https://latex.codecogs.com/svg.latex?\Large&space;[-1,1]" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />  range without breaking the sparsity of the images, we can use max absolute scaling,
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;X_{MAbs}=\frac{X_{norm}}{max(abs(X_{norm}),axis=0)}" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
 
 
 
-#### (3) PCA
 
-Linear dimensionality reduction using Singular Value Decomposition of the data to project it to a lower dimensional space. Since there are 10​ classes in the dataset, we can first set the decomposition components to be ​10. After careful trial, 10​ tend to be a good choice.
 
+## 4. Feature Engineering
 
+### a. Direct Link
 
-### b. Preprocessing for LeNet
+Given a specific buyer and seller, it's not difficult to find out the times of the four actions that the buyers have done in the store of the merchants. Here we define a 6-dimension vector to denote the direct link between the user and the merchant:
 
-#### (1) Reshape 
+<img src="https://latex.codecogs.com/svg.latex?\Large&space;v_d=(gender,age,click,cart,buy,favorite)" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
 
-Since convolution network requires the input to be 3D​ images, we need to reshape the image vector into image matrix with size of 28 x 28​ and one channel. Now the range of each component is [0,255]​ .
+### b. Indirect Link
 
-Dimension of data  before reshape: (40000,784)​
+##### (1) First we define the weight for different action types:
 
-Dimension of data  after reshape: (40000,28,28,1)​
+|     Action      | Value | Times | Weight |
+| :-------------: | :---: | :---: | :----: |
+|      Click      |   0   |  n_1  |  0.1   |
+|   Add to Cart   |   1   |  n_2  |  0.2   |
+|       Buy       |   2   |  n_3  |  0.3   |
+| Add to Favorite |   3   |  n_4  |  0.4   |
 
-#### (2) Scaling
 
-Using the function "transform.ToTensor" in Gluon, we can again reshape the data for the standard input in the framework and scale the data in the range [0,1)​ .
 
-Dimension of data  before scaling: (40000,28,28,1)​
+##### (2) Vitality and Popularity
 
-Dimension of data  after scaling: (40000,1,28,28)​
+Vitality is used to measure the extent of how much the user loves shopping. Popularity refers to how attractive the merchant's commodity is. They are both calculated by the weighted average of the four actions. And they can be specifically defined as **category vitality**, **brand vitality** for the user and **category popularity**, **brand popularity** for the merchant.
 
 
 
-## Predictors Description
+Now we illustrate the calculation by taking the **category vitality** as an example.
 
-### a. Decision Tree
 
-#### Parametrization
 
-|    Parameters    |                       Description                       | Value  |
-| :--------------: | :-----------------------------------------------------: | :----: |
-|    max depth     |                maximum depth of the tree                | 10:100 |
-| min samples leaf | minimum number of samples required to be at a leaf node |  1:5   |
+The score of a good<img src="https://latex.codecogs.com/svg.latex?\Large&space;j" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" /> for a given user <img src="https://latex.codecogs.com/svg.latex?\Large&space;i" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" /> is
 
+<img src="https://latex.codecogs.com/svg.latex?\Large&space;score_{ij}=0.1*n_1+0.2*n_2+0.3*n_3+0.4*n_4" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
 
+The  **category vitality** of user <img src="https://latex.codecogs.com/svg.latex?\Large&space;i" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" /> is
 
-### b. LeNet
+<img src="https://latex.codecogs.com/svg.latex?\Large&space;S_{cat-vitality}^i=mean(score_{ij})\quad j=1,2,3,\cdots,n_i" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
 
-#### (1) Model Description
+where <img src="https://latex.codecogs.com/svg.latex?\Large&space;n_i" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" /> refers the item that is relevant to the user <img src="https://latex.codecogs.com/svg.latex?\Large&space;i" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />.
 
-<img src="https://github.com/VitoDH/stat535_project/raw/master/img/network_2.png" style="zoom:90%" />
 
-<center><B>Fig. 2 </B>Model Architechture (by TensorSpace)</center>
 
-The model is constructed as follows:
+Similarly, we can calculate the other three indicators and combine them into a 4-dimension vector:
 
-|    layer     | filters/channels | kernel size | pool size | strides | activation |
-| :----------: | :--------------: | :---------: | :-------: | :-----: | :--------: |
-|    input     |        1         |    None     |   None    |  None   |    None    |
-|     Conv     |        20        |      5      |   None    |  None   |    Relu    |
-|   MaxPool    |        20        |    None     |     2     |    2    |    None    |
-|     Conv     |        50        |      5      |   None    |  None   |    Relu    |
-|   MaxPool    |        50        |    None     |     2     |    2    |    None    |
-| FullyConnect |       120        |    None     |   None    |  None   |    None    |
-| FullyConnect |        84        |    None     |   None    |  None   |    None    |
-|    output    |        10        |    None     |   None    |  None   |  Softmax   |
+<img src="https://latex.codecogs.com/svg.latex?\Large&space;v_i=(S_{cat-vitality},S_{brand -vitality},S_{category-popularity},S_{brand-popularity})" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
 
-#### (2) Parametrization
 
-|  Parameters   |                 Description                  | Value |
-| :-----------: | :------------------------------------------: | :---: |
-| learning rate |        control the speed for learning        | 0.001 |
-|  num epochs   |               number of epochs               |  80   |
-|  batch size   | number of  samples in one batch for training |  128  |
-|    dropout    |      regularization term in the network      |  0.4  |
 
+### c. Normalization
 
+After setting up the features, we find out the each feature have different scales. Thus, it would be reasonable to scale the attributes to [0,1] using the following formula:
 
+<img src="https://latex.codecogs.com/svg.latex?\Large&space;\frac{x_i-min(x_i)}{max(x_i)-min(x_i)}" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
 
 
-## Training Strategy
 
-### a. Decision Tree
+### d. PCA
 
-#### (1) Grid Search Cross Validation
+Based on part a and b, we have obtained **10** features. In order to simplify the training process and remove useless information, we perform PCA on the training set. The scree plot and the variance of components are given as follows:
 
-- Parameters: minimum samples of leaf and maximum depth
-- Training set size: 32000
-- Validation set size: 8000
-- **5 fold Cross Validation**: record the accuracy of training set and validation set
-- Select the model with highest mean accuracy in the validation set
+ <img src="https://github.com/VitoDH/repeated_buyers/raw/master/img/scree_plot.png" style="zoom:90%" />
 
-#### (2) Dataset Splitting and model demo
+<img src="https://github.com/VitoDH/repeated_buyers/raw/master/img/pca_var.png" style="zoom:90%" />
 
-To demonstrate the model, we can again split the data into training set and validation set. At this time, the size of validation set can be much more smaller since it's used for demo instead of tuning the parameter.
 
-- Training set size: 39600
-- Validation set size: 400
 
+Noting that the cumulative proportion has reach **0.94** on the 4th principal component, we can simply pick the first four principal components as our attributes for training.
 
 
-### b. LeNet
 
-#### (1) Xavier Initialization
 
-According to the paper of Glorot & Bengio , we assume that for a specific layer $L$, the number of input  and output units are respectively, $n_{in}$ and $n_{out}$ .  
 
-The requirement for the weight  layer L should be:
+## 5. Balance 
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;Var(W^L)=\frac{2}{n_{L}+n_{L+1}}" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
+Taking a glance at the distribution of the label, 
 
-And the initialization of weights  follow the uniform distribution:
+|        Type        | Number |
+| :----------------: | :----: |
+|    Total Sample    | 90917  |
+| Positive Label (1) |  5363  |
+| Negative Label (0) | 85554  |
+|   Number of User   | 75053  |
+| Number of Merchant |  1982  |
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space;W\sim U[-\sqrt{\frac{6}{n_L+n_{L+1}}},\sqrt{\frac{6}{n_L+n_{L+1}}}]" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
 
-#### (2)  Dataset Splitting
 
-Split the data into training set and validation set and shuffle the training set for training.
+From the above table, the positive samples only covers 5.9% of the total samples, which will easily lead to a situation that all the positive label will be classified as negative.
 
-- Training set size: 38000
-- Validation set size: 2000
+We use four ways of sampling to address this problem and obtain a balance dataset.
 
-#### (3)  Network Architecture and dropout
 
-Following the model description above,  we set up 
 
-- 2 convolution layers with **Relu** activation followed by 2 max pooling layers respectively.
-- 2 fully connected layers in the end,  add a **dropout** term serving as **regularization** 
+|     Label      |   0   |   1   |
+| :------------: | :---: | :---: |
+|      Raw       | 84700 | 5300  |
+| Over Sampling  | 84700 | 84700 |
+| Under Sampling | 5300  | 5300  |
+| Over and Under | 44959 | 45041 |
+|     SMOTE      | 44959 | 45041 |
 
-#### (4) Training
 
-Setting the training epochs to be $80$, we record the training loss, validation loss, training accuracy and validation accuracy. Pick the model in the last epoch and save its parameters.
 
 
 
-## Experimental Results
+## 6. Training with XG Boost
 
-### a. Decision Tree
+XG Boost is an cutting-edge algorithm derived from GBDT , which can deal with missing data and avoid overfitting.
 
-#### (1) Tuning the parameters
+### a. Parametrization
 
-The range of the hyper parameter is:
+|    Parameters     |  Value   |
+| :---------------: | :------: |
+|     max_depth     |    5     |
+|   learning_rate   |   0.1    |
+|     max_iter      |   800    |
+| learning_function | logistic |
 
-- max_depth: 10,20,30,40,50,60,70,80,90,100​
-- min_samples_leaf: 1,2,3,4,5​
 
 
+### b. Performance under different sampling
 
-For a fixed min samples leaf, we can plot the accuracy vs max depth. Here we set min samples leaf=1.
+#### (1) Over Sampling
 
-<img src="https://github.com/VitoDH/stat535_project/raw/master/img/gridsearch_depth.png" style="zoom:40%" />
+<img src="https://github.com/VitoDH/repeated_buyers/raw/master/img/xg_over_sample.png" style="zoom:90%" />
 
-<center><B>Fig. 3 </B>GridSearchCV for max depth in Decision Tree</center>
+|               | **Train** | **Test** |
+| :-----------: | :-------: | :------: |
+| **Precision** |   0.783   |  0.128   |
+|  **Recall**   |   0.846   |  0.444   |
+| **F1 Score**  |   0.814   |  0.200   |
+| **F2 Score**  |   0.832   |  0.297   |
+|    **AUC**    |   0.885   |  0.603   |
 
-- The accuracy of training set and validation set both goes up as maximum depth increases and become stable after max\_depth=40​ .
 
 
+#### (2) Under Sampling
 
-For a fixed max depth, we can plot the accuracy vs min sample leaf. Here we set max depth=None, which means that the tree will grow to the maximum depth.
+<img src="https://github.com/VitoDH/repeated_buyers/raw/master/img/xg_under_sample.png" style="zoom:90%" />
 
-<img src="https://github.com/VitoDH/stat535_project/raw/master/img/gridsearch_leaf.png" style="zoom:40%" />
+|               | **Train** | **Test** |
+| :-----------: | :-------: | :------: |
+| **Precision** |   0.833   |   0.08   |
+|  **Recall**   |   0.862   |  0.667   |
+| **F1 Score**  |   0.848   |  0.144   |
+| **F2 Score**  |   0.856   |  0.270   |
+|    **AUC**    |   0.929   |  0.549   |
 
-<center><B>Fig. 4 </B>GridSearchCV for min sample leaf in Decision Tree</center>
 
-- The accuracy of training set and validation set both goes down as min samples leaf increases.
 
+#### (c) Both
 
+<img src="https://github.com/VitoDH/repeated_buyers/raw/master/img/xg_both.png" style="zoom:90%" />
 
-From the two graphs above , we can conclude that the accuracy of validation(test) set is maximized when **max\_depth=40** and **min\_samples\_leaf=1​**. 
+|               | **Train** | **Test** |
+| :-----------: | :-------: | :------: |
+| **Precision** |   0.817   |  0.119   |
+|  **Recall**   |   0.846   |  0.460   |
+| **F1 Score**  |   0.832   |  0.190   |
+| **F2 Score**  |   0.839   |  0.293   |
+|    **AUC**    |   0.909   |  0.609   |
 
-Actually, considering the combination of two parameters at the same time, we can still have the same conclusion that the best accuracy is **0.84**​. 
 
 
+#### (d) SMOTE
 
-#### (2) Training and validation demo
+<img src="https://github.com/VitoDH/repeated_buyers/raw/master/img/xg_smote.png" style="zoom:90%" />
 
-From part (1), we can select the final model to be a decision tree with **max\_depth=40**​ and **min\_samples\_leaf=1**​ . Splitting the raw dataset into training set and validation set, we can fit the model again and obtain the following results.
+|               | **Train** | **Test** |
+| :-----------: | :-------: | :------: |
+| **Precision** |   0.727   |  0.143   |
+|  **Recall**   |   0.687   |  0.460   |
+| **F1 Score**  |   0.706   |  0.218   |
+| **F2 Score**  |   0.695   |  0.318   |
+|    **AUC**    |   0.789   |  0.641   |
 
 
 
-**Estimation of classification error L**
+## 7. Conclusion
 
-| training error | validation error |
-| :------------: | :--------------: |
-|      0.0       |      0.0925      |
+From the results above, we are able to conclude that:
 
+* Model successfully captures the information in the dataset, represented by high F1 score and AUC in the training set.
+* Model can be used to detect whether a buyer will come back again to a specific online store as long as the data between them is given.
+* For improvement in the test set, we need to focus more on the feature engineering part and the sampling part.
 
-
-### b. LeNet
-
-After training for $80$ epochs, we can plot the following learning curve including loss and accuracy of training set and validation set.
-
-<img src="https://github.com/VitoDH/stat535_project/raw/master/img/learning_curve.png" style="zoom:60%" />
-
-<center><B>Fig. 5 </B>Learning Curve</center>
-
-- Training loss decreases as the number of epochs increases. However, the validation loss first decreases but goes up after $10$ epochs, which indicates minor overfitting.
-- Both training and validation accuracy increase as the epochs increases and become steady after 40 epochs.
-
-
-
-**Estimation of classification error L**
-
-| training error | validation error |
-| :------------: | :--------------: |
-|     0.0049     |      0.056       |
-
-
-
-------
-
-## Reference
-
-[1]Breiman L, Friedman J, Olshen R, etal. Classification and Regression Trees [M]. New York: Chapman
-& Hall, 1984.
-
-[2] Xavier Glorot, Yoshua Bengio. Understanding the difficulty of training deep feedforward neural networks [J]. PMLR, 2010.
-
-[3]Y. LeCun, Y. Bengio. Convolutional networks for images, speech, and time-series [ J]. The Handbook of Brain Theory and Neural Networks. MIT Press, 1995.
